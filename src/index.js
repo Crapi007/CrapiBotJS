@@ -6,6 +6,7 @@
 require('dotenv').config();
 
 // Imports discord.js and gives the bot certain permissions
+const cron = require('node-cron');
 const { Client, IntentsBitField, ActivityType } = require('discord.js');
 const bot = new Client({
     intents: [
@@ -42,9 +43,13 @@ global.servers = {};
 bot.on('guildMemberAdd', member =>{
     
     const channel = member.guild.channels.find(channel.name === "crapi-bot");
+
     if(!channel) {
+
         return;
+
     }
+
     channel.send(`Welcome to our Server, ${member}`);
 
 })
@@ -55,17 +60,26 @@ bot.on('interactionCreate', (interaction) => {
 
     // Bot writes messahe about Dice Maiden
     if (interaction.commandName === 'dicemaiden') {
+
         interaction.reply('**Screw the Dice Maiden, all my Homies hate the Dice Maiden**');
+
     };
 
     // Bot rolls given amount of die with certain amount of sides
     if (interaction.commandName === 'roll') {
+
         let bonus;
+
         if (interaction.options.get('bonus') == null) {
+
             bonus = 0;
+
         } else {
+
             bonus = interaction.options.get('bonus').value;
+
         };
+
         const diceamount = interaction.options.get('dice-amount').value;
         const dicesides = interaction.options.get('dice-sides').value;
 
@@ -96,6 +110,15 @@ bot.on('interactionCreate', (interaction) => {
     };
 
 });
+const orbReminder = cron.schedule("0 30 23 * * *", () => {
+
+    const craapi = process.env.CRAAPI;
+
+    const crapibotChannel = bot.channels.cache.get(process.env.CRAPIBOT_CHANNEL);
+    crapibotChannel.send(`<@${craapi}> **Daily Orb Reminder**`);
+
+});
+orbReminder.start();
 
 // Temporarily disabled Prefix Commands
 
