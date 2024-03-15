@@ -1,20 +1,37 @@
 /*
   File: index.js
-  Autor: Craapi
+  Author: Craapi
   Date: 2024-01-23
 */
-require('dotenv').config();
 
-// Imports discord.js and gives the bot certain permissions
-const cron = require('node-cron');
-const { Client, IntentsBitField, ActivityType } = require('discord.js');
-const bot = new Client({
+//  Import needed libraries
+require('dotenv').config();
+const TwitchApi = require('twitch-api');
+const path = require('path');
+const { CommandKit } = require('commandkit');
+const { Player } = require('discord-player');
+const { Client, IntentsBitField } = require('discord.js');
+
+// Create a new client instance and set permissions 
+const client = new Client({
     intents: [
         IntentsBitField.Flags.Guilds,
         IntentsBitField.Flags.GuildMembers,
         IntentsBitField.Flags.GuildMessages,
         IntentsBitField.Flags.MessageContent,
+        IntentsBitField.Flags.GuildVoiceStates
     ],
+});
+
+// Use CommandKit to handle Events and Commands
+
+new CommandKit({
+    client,
+    commandsPath: path.join(__dirname, 'commands'),
+    eventsPath: path.join(__dirname, 'events'),
+    validationsPath: path.join(__dirname, 'validations'),
+    devGuildIds: [process.env.SERVER],
+    devUserIds: ['381812516046766095', '293059898873348097'],
 });
 
 // Set Prefix for non Slash-Commands
@@ -26,21 +43,13 @@ var userdescprition = 'none'
 
 var servers = {};
 
-// Logs in Bot and sets activity
-bot.login(process.env.TOKEN);
-bot.on('ready', () =>{
-    console.log('Online')
-    try{
-        bot.user.setActivity('Finding Mathegolem', { type: ActivityType.Watching});
-    } catch(error) {
-        console.log(`Error: ${error}`);
-    }
-});
+// Logs in Bot
+client.login(process.env.TOKEN);
 
 global.servers = {};
 
 // Bot reacts to a member joining and writes a message
-bot.on('guildMemberAdd', member =>{
+client.on('guildMemberAdd', member =>{
     
     const channel = member.guild.channels.find(channel.name === "crapi-bot");
 
@@ -54,73 +63,22 @@ bot.on('guildMemberAdd', member =>{
 
 })
 
-//Bot listens for Slash-Commands
-bot.on('interactionCreate', (interaction) => {
-    if(!interaction.isChatInputCommand()) return;
+// Create Player Instance of the Bot
 
-    // Bot writes messahe about Dice Maiden
-    if (interaction.commandName === 'dicemaiden') {
+client.player = new Player(client, {
+    ytdlOptions: {
+        quality: 'highestaudio',
+        highWaterMark: 1 << 25
+    }
+})
+client.player.extractors.loadDefault();
 
-        interaction.reply('**Screw the Dice Maiden, all my Homies hate the Dice Maiden**');
-
-    };
-
-    // Bot rolls given amount of die with certain amount of sides
-    if (interaction.commandName === 'roll') {
-
-        let bonus;
-
-        if (interaction.options.get('bonus') == null) {
-
-            bonus = 0;
-
-        } else {
-
-            bonus = interaction.options.get('bonus').value;
-
-        };
-
-        const diceamount = interaction.options.get('dice-amount').value;
-        const dicesides = interaction.options.get('dice-sides').value;
-
-        let diceoutput = "";
-        let total = 0;
-        let temp = 0;
-
-        for (let i = 1; i <= diceamount; i++) {
-
-            if(i == diceamount) {
-
-            temp = Math.floor(Math.random() * dicesides + 1);
-            diceoutput += temp + ` + ` + bonus
-            total = total + temp;
-            total = total + bonus;
-
-            } else {
-            
-            temp = Math.floor(Math.random() * dicesides + 1);
-            total = total + temp;
-            diceoutput += temp + ", ";
-
-            };
-        };
-
-        //interaction.reply(20 + " | **Total:** " + 20);
-        interaction.reply(diceoutput + " | **Total:** " + total);
-    };
-
+const twitch = new TwitchApi({
+    clientId: process.env.TWITCH_CLIENT_ID,
+    clientSecret: process.env.TWITCH_CLIENT_SECRET,
 });
-const orbReminder = cron.schedule("0 30 23 * * *", () => {
 
-    const craapi = process.env.CRAAPI;
-
-    const crapibotChannel = bot.channels.cache.get(process.env.CRAPIBOT_CHANNEL);
-    crapibotChannel.send(`<@${craapi}> **Daily Orb Reminder**`);
-
-});
-orbReminder.start();
-
-// Temporarily disabled Prefix Commands
+// Disabled Prefix Commands
 
 /* bot.on('message', message=>{
  
