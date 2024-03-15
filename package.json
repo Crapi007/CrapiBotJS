@@ -10,9 +10,24 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@discord-player/extractor": "^4.4.6",
+    "@discordjs/builders": "^1.7.0",
+    "@discordjs/opus": "^0.9.0",
+    "@discordjs/rest": "^2.2.0",
+    "@discordjs/voice": "^0.16.1",
+    "commandkit": "^0.1.10",
     "cron": "^3.1.6",
+    "discord-api-types": "^0.37.71",
+    "discord-player": "^6.6.7",
     "discord.js": "^14.14.1",
     "dotenv": "^16.4.5",
-    "node-cron": "^3.0.3"
+    "ffmpeg": "^0.0.4",
+    "ffmpeg-static": "^5.2.0",
+    "node-cron": "^3.0.3",
+    "node-pre-gyp": "^0.17.0",
+    "python": "^0.0.4",
+    "rebuild": "^0.1.2",
+    "twitch-api": "^0.5.0",
+    "ytdl-core": "^4.11.5"
   }
 }
